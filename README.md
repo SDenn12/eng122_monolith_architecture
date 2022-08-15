@@ -26,7 +26,9 @@ Generally better for  smaller lightweight applications (compared to micro-servic
 Steps:
 
 1. Make a directory 
-2. Create your vagrant file
+2. Download app and environment folders
+3. Inside the folder which contains the tests run `gem install bundler` and then `bundle`
+4. Create your vagrant file
 ```
 Vagrant.configure("2") do |config|
 
@@ -45,7 +47,7 @@ Vagrant.configure("2") do |config|
 
 end
 ```
-3. Create a provision file installing dependencies(must end in .sh)
+5. Create a provision file installing dependencies(must end in .sh)
 ```
 # updates ubuntu
 sudo apt-get update
@@ -65,10 +67,11 @@ sudo apt-get install -y nodejs
 # pm2 install
 sudo npm install pm2
 ```
-4. Enter `vagrant up` to create your vm.
-5. Enter `vagrant ssh` to connect to your vm
-6. Navigate to where the app.js file is located
-7. Use command `npm install` 
-8. Use command `npm start`
-9. The app should now be working. 
+6. Enter `vagrant up` to create your vm.
+7. Enter `rake spec` inside your tests directory 
+8. Enter `vagrant ssh` to connect to your vm in the directory with the vagrant file
+9. Navigate to where the app.js file is located
+10. Use command `npm install` 
+11. Use command `npm start`
+12. The app should now be working. 
 ![](app_working.PNG)
