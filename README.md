@@ -2,7 +2,7 @@
 
 A monolithic artchitecture is the traditional unified model for the design of a software program.
 
-![](mono_image.png)
+![image](https://user-images.githubusercontent.com/110126036/184668623-8d09484c-d224-46a2-9be8-e03a50f9c142.png)
 
 It is self-contained where the programs components are tightly coupled. Each component is combined into one large application and therefore have large codebases which can be difficult to maintain. 
 
