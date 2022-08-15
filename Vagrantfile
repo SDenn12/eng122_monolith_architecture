@@ -12,8 +12,11 @@ Vagrant.configure("2") do |config|
 # if reload does not work - try - vagrant destroy - then - vagrant up 
 
 # let's sync our app folder from localhost to VM
- config.vm.synced_folder ".", "/home/vagrant/app" 
-# synch data form localhost   destination 
+ config.vm.synced_folder ".", "/home/vagrant/app"  
+
+# make provision file and connect it
+ config.vm.provision :shell, path: "provision.sh"
+
+
 end
-# vagrant ssh
-# from the location where your Vagrantfile is
+
