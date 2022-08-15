@@ -8,10 +8,18 @@ It is self-contained where the programs components are tightly coupled. Each com
 
 Other parts of the code may also need to be rewritten if updates are made to a smaller portion of the code.
 
-Benefits of Monolithic Architecture include:
+Benefits of Monolithic architecture include:
 
 - Faster run-time
 - Easier/faster in early stages of development
+
+Disadvantages of Monolithic architecture include:
+
+- Less adaptable
+- Difficult to understand/debug
+- Must redeploy entire application even if only fixing a single part
+  
+Hard to scale the application with monolithic approach, a bug in one area can also bring down the entire application.
 
 Generally better for  smaller lightweight applications (compared to micro-services architecture).
 
