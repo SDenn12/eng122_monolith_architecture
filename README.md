@@ -90,7 +90,43 @@ sudo npm install pm2
 - Set environment variables inside with `export First_Name=Sam`
 - `source ~/.bashrc` to refresh
 
-## How to Automate Reverse Proxy
+
+## Creating Multiple VM's
+
+![](diagram.PNG)
+
+Configure Vagrantfile as such:
+
+- Ensure Vagrant file is configured as such.
+```
+Vagrant.configure("2") do |config|
+    
+    config.vm.define "app" do |app| # creates the app vm 
+
+        # creating a virtual machine ubuntu 
+        config.vm.box = "ubuntu/xenial64" # Linux - ubuntu 16.04 
+        
+        # configures the private network
+        config.vm.network "private_network", ip: "192.168.10.100"
+
+        # syncs our app folder from localhost to VM
+        config.vm.synced_folder ".", "/home/vagrant/app"  
+
+        # make provision file and connects it
+        config.vm.provision :shell, path: "provision.sh"
+    end
+
+    # makes the database virtual machine
+    config.vm.define "db" do |db|
+        # creates the vm using ubuntu bionic 64
+        db.vm.box = "ubuntu/bionic64"
+        # sets the private network connection
+        db.vm.network "private_network", ip: "192.168.10.150"
+
+    end
+ end
+```
+### How to Automate Reverse Proxy
 1. Create reverse proxy file.
 ```
 server {
@@ -135,36 +171,6 @@ sudo cp -f app/rev_prox_file /etc/nginx/sites-available/default
 sudo systemctl restart nginx
 
 ```
-3. Ensure Vagrant file is configured as such.
-```
-# What is Vagratn - it's owned by Hashi-Corp
+3. Reload/Up the App VM
+4. Go into the app directory and run using `npm install` and `npm start`. 
 
-# Ruby
-
-
-Vagrant.configure("2") do |config|
-    
-    config.vm.define "app" do |app|
-        config.vm.box = "ubuntu/xenial64" # Linux - ubuntu 16.04
-        # creating a virtual machine ubuntu 
-        config.vm.network "private_network", ip: "192.168.10.100"
-        # once you have added private network, you need reboot VM - vagrant reload
-        # if reload does not work - try - vagrant destroy - then - vagrant up 
-
-        # let's sync our app folder from localhost to VM
-        config.vm.synced_folder ".", "/home/vagrant/app"  
-
-        # make provision file and connect it
-        config.vm.provision :shell, path: "provision.sh"
-    end
-
-
-    config.vm.define "db" do |db|
-        db.vm.box = "ubuntu/bionic64"
-        db.vm.network "private_network", ip: "192.168.10.150"
-
-    end
- end
-```
-4. Reload/Up the App VM
-5. Go into the app directory and run using `npm install` and `npm start`. 
