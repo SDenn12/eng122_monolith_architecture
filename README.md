@@ -89,3 +89,76 @@ sudo npm install pm2
 - and `DB_HOST=mongodb://192:168:10:150:27017/posts`
 - Set environment variables inside with `export First_Name=Sam`
 - `source ~/.bashrc` to refresh
+
+## Automating the App Application with Reverse Proxy
+
+1. Create the reverse proxy file. In this case I have named it rev_prox_file
+```
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        root /var/www/html;
+
+        
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location / {
+                proxy_pass http://localhost:3000;
+        }
+
+}
+```
+2. Configure your vagrant file as follows.
+```
+Vagrant.configure("2") do |config|
+    
+    config.vm.define "app" do |app|
+        config.vm.box = "ubuntu/xenial64" # Linux - ubuntu 16.04
+        # creating a virtual machine ubuntu 
+        config.vm.network "private_network", ip: "192.168.10.100"
+        # once you have added private network, you need reboot VM - vagrant reload
+        # if reload does not work - try - vagrant destroy - then - vagrant up 
+
+        # let's sync our app folder from localhost to VM
+        config.vm.synced_folder ".", "/home/vagrant/app"  
+
+        # make provision file and connect it
+        config.vm.provision :shell, path: "provision.sh"
+    end
+
+
+    config.vm.define "db" do |db|
+        db.vm.box = "ubuntu/bionic64"
+        db.vm.network "private_network", ip: "192.168.10.150"
+
+    end
+ end
+```
+3. Change the provision file such that:
+```
+# updates ubuntu
+sudo apt-get update
+sudo apt-get upgrade -y
+
+# nginx install
+sudo apt-get install nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+
+# nodejs install
+sudo apt-get purge nodejs npm
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# pm2 install
+sudo npm install pm2 -g
+
+# automate 
+sudo cp -f app/rev_prox_file /etc/nginx/sites-available/default
+sudo systemctl restart nginx
+```
+4. Reload/Up the vagrant app file to allow the rev_prox_file be copied into the VM.
+5. Then navigate to your directory with app.js and run the commands `npm install` and then `npm start`
