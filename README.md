@@ -89,3 +89,6 @@ sudo npm install pm2
 - and `DB_HOST=mongodb://192:168:10:150:27017/posts`
 - Set environment variables inside with `export First_Name=Sam`
 - `source ~/.bashrc` to refresh
+** export mongodb was deleted at this stage as no DB created and was causing errors.
+
+![image](https://user-images.githubusercontent.com/110126036/184866690-e48030d3-2148-48dd-83c3-9444eb21c257.png)
