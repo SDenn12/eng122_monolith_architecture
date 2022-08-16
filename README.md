@@ -89,3 +89,82 @@ sudo npm install pm2
 - and `DB_HOST=mongodb://192:168:10:150:27017/posts`
 - Set environment variables inside with `export First_Name=Sam`
 - `source ~/.bashrc` to refresh
+
+## How to Automate Reverse Proxy
+1. Create reverse proxy file.
+```
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        root /var/www/html;
+
+        
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location / {
+                proxy_pass http://localhost:3000;
+        }
+
+}
+
+```
+2. Update provision file.
+```
+# updates ubuntu
+sudo apt-get update
+sudo apt-get upgrade -y
+
+# nginx install
+sudo apt-get install nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+
+# nodejs install
+sudo apt-get purge nodejs npm
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# pm2 install
+sudo npm install pm2 -g
+
+# automate 
+sudo cp -f app/rev_prox_file /etc/nginx/sites-available/default
+sudo systemctl restart nginx
+
+```
+3. Ensure Vagrant file is configured as such.
+```
+# What is Vagratn - it's owned by Hashi-Corp
+
+# Ruby
+
+
+Vagrant.configure("2") do |config|
+    
+    config.vm.define "app" do |app|
+        config.vm.box = "ubuntu/xenial64" # Linux - ubuntu 16.04
+        # creating a virtual machine ubuntu 
+        config.vm.network "private_network", ip: "192.168.10.100"
+        # once you have added private network, you need reboot VM - vagrant reload
+        # if reload does not work - try - vagrant destroy - then - vagrant up 
+
+        # let's sync our app folder from localhost to VM
+        config.vm.synced_folder ".", "/home/vagrant/app"  
+
+        # make provision file and connect it
+        config.vm.provision :shell, path: "provision.sh"
+    end
+
+
+    config.vm.define "db" do |db|
+        db.vm.box = "ubuntu/bionic64"
+        db.vm.network "private_network", ip: "192.168.10.150"
+
+    end
+ end
+```
+4. Reload/Up the App VM
+5. Go into the app directory and run using `npm install` and `npm start`. 
