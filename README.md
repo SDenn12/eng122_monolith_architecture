@@ -95,7 +95,11 @@ sudo npm install pm2
 
 ![](diagram.PNG)
 
-Configure Vagrantfile as such:
+We can see in the app.js we require a link to an external database. This is being called from the APP program so can be seen as monolithic architecture.
+
+![](dblink.PNG)
+
+In order to create a separate VM to create the database on configure the Vagrantfile as below:
 
 - Ensure Vagrant file is configured as such.
 ```
