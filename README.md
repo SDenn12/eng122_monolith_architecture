@@ -75,3 +75,17 @@ sudo npm install pm2
 11. Use command `npm start`
 12. The app should now be working. 
 ![](app_working.PNG)
+
+
+### Linux Variable & Env Variable in Linux - Windows - Mac
+- How to check existing Env Var `env` or `printenv`
+- How to create a var in linux `Name=Sam`
+- How to check Linux variables `echo $Name` 
+- Env var we havea a key word called `export var=val`
+- Check specific env var `printenv Last_Name`
+
+### How to save Env Variables
+- Research how to make env persistent of your first name last name
+- and `DB_HOST=mongodb://192:168:10:150:27017/posts`
+- Set environment variables inside with `export First_Name=Sam`
+- `source ~/.bashrc` to refresh
