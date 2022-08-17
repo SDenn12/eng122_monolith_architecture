@@ -178,3 +178,14 @@ sudo systemctl restart nginx
 3. Reload/Up the App VM
 4. Go into the app directory and run using `npm install` and `npm start`. 
 
+### MongoDB
+- Run updates and upgrades
+- Retrieve key from Mongo website
+`sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv D68FA50FEA312927`
+- Install required packages
+`echo "deb https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list`
+- Run updates and upgrades again
+- Install supported version for app
+`sudo apt-get install -y mongodb-org=3.2.20 mongodb-org-server=3.2.20 mongodb-org-shell=3.2.20 mongodb-org-mongos=3.2.20 mongodb-org-tools=3.2.20`
+- Check status of mongodb if it is not running enable and start mongod
+- 
