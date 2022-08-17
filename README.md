@@ -108,16 +108,16 @@ Vagrant.configure("2") do |config|
     config.vm.define "app" do |app| # creates the app vm 
 
         # creating a virtual machine ubuntu 
-        config.vm.box = "ubuntu/xenial64" # Linux - ubuntu 16.04 
+        app.vm.box = "ubuntu/xenial64" # Linux - ubuntu 16.04 
         
         # configures the private network
-        config.vm.network "private_network", ip: "192.168.10.100"
+        app.vm.network "private_network", ip: "192.168.10.100"
 
         # syncs our app folder from localhost to VM
-        config.vm.synced_folder ".", "/home/vagrant/app"  
+        app.vm.synced_folder ".", "/home/vagrant/app"  
 
         # make provision file and connects it
-        config.vm.provision :shell, path: "provision.sh"
+        app.vm.provision :shell, path: "provision.sh"
     end
 
     # makes the database virtual machine
@@ -188,4 +188,127 @@ sudo systemctl restart nginx
 - Install supported version for app
 `sudo apt-get install -y mongodb-org=3.2.20 mongodb-org-server=3.2.20 mongodb-org-shell=3.2.20 mongodb-org-mongos=3.2.20 mongodb-org-tools=3.2.20`
 - Check status of mongodb if it is not running enable and start mongod
-- 
+
+## Automating Application (Including DB)
+1. CONFIGURE APP PROVISION FILE
+```
+# updates ubuntu
+sudo apt-get update
+sudo apt-get upgrade -y
+
+# nginx install
+sudo apt-get install nginx -y
+sudo systemctl enable nginx
+sudo systemctl start nginx
+
+# nodejs install
+sudo apt-get purge nodejs npm
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# pm2 install
+sudo npm install pm2 -g
+
+# automate reverse proxy
+sudo cp -f app/rev_prox_file /etc/nginx/sites-available/default
+sudo systemctl restart nginx
+
+# declares env variable
+echo "DB_HOST=mongodb://192.168.10.150:27017/posts" | sudo tee -a /etc/environment
+
+# updates the seed
+cd app/app
+npm install
+cd seeds
+sudo node seed.js
+
+# system update
+sudo apt-get update
+sudo apt-get upgrade -y
+```
+2. CONFIGURE DB PROVISION FILE
+```
+# updates ubuntu
+sudo apt-get update
+sudo apt-get upgrade -y
+
+# retrieves key from mongodb
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv D68FA50FEA312927
+echo "deb https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+
+# updates ubuntu
+sudo apt-get update
+sudo apt-get upgrade -y
+
+sudo apt-get install -y mongodb-org=3.2.20 mongodb-org-server=3.2.20 mongodb-org-shell=3.2.20 mongodb-org-mongos=3.2.20 mongodb-org-tools=3.2.20
+
+# enables and starts mongodb
+sudo systemctl restart mongod
+sudo systemctl enable mongod
+
+# replaces the config file
+sudo cp -f app/mongod.conf /etc/mongod.conf
+sudo systemctl restart mongod
+```
+3. UPDATE VAGRANT FILE
+```
+Vagrant.configure("2") do |config|
+
+    config.vm.define "db" do |db|
+        db.vm.box = "ubuntu/bionic64"
+        db.vm.network "private_network", ip: "192.168.10.150"
+
+        # let's sync our app folder from localhost to VM
+        db.vm.synced_folder ".", "/home/vagrant/app"  
+
+        # make provision file and connect it
+        db.vm.provision :shell, path: "provisionDB.sh"
+    end
+
+    config.vm.define "app" do |app|
+        app.vm.box = "ubuntu/xenial64" # Linux - ubuntu 16.04
+        # creating a virtual machine ubuntu 
+        app.vm.network "private_network", ip: "192.168.10.100"
+        # once you have added private network, you need reboot VM - vagrant reload
+        # if reload does not work - try - vagrant destroy - then - vagrant up 
+
+        # let's sync our app folder from localhost to VM
+        app.vm.synced_folder ".", "/home/vagrant/app"  
+
+        # make provision file and connect it
+        app.vm.provision :shell, path: "provision.sh"
+    end
+
+
+    
+ end
+```
+4. CREATE MONGOD CONFIG FILE
+```
+# mongod.conf
+
+# for documentation of all options, see:
+#   http://docs.mongodb.org/manual/reference/configuration-options/
+
+# Where and how to store data.
+storage:
+  dbPath: /var/lib/mongodb
+  journal:
+    enabled: true
+#  engine:
+#  mmapv1:
+#  wiredTiger:
+
+# where to write logging data.
+systemLog:
+  destination: file
+  logAppend: true
+  path: /var/log/mongodb/mongod.log
+
+# network interfaces
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+```
+5. Run `vagrant up`, `vagrant ssh app` navigate to the app.js file and then run `npm start`.
+
